@@ -1,0 +1,6 @@
+[
+  {"id":"h-101","type":"blind-curve","title":"Blind curve ahead","description":"Limited visibility around the bend. Sound your horn before proceeding.","location":"Jharipani Road bend","lat":30.4568,"lng":78.0792,"severity":"High","reportedAt":"2026-10-04T08:10:00.000Z","status":"active"},
+  {"id":"h-102","type":"landslide","title":"Loose rocks near road","description":"Small debris on the downhill lane. Pass slowly and keep distance.","location":"Bhatta Falls turn","lat":30.4694,"lng":78.0851,"severity":"Medium","reportedAt":"2026-10-04T07:52:00.000Z","status":"active"},
+  {"id":"h-103","type":"poor-lighting","title":"Poor lighting","description":"Street lighting is out for this short stretch.","location":"Library Chowk approach","lat":30.4591,"lng":78.0661,"severity":"Medium","reportedAt":"2026-10-04T07:35:00.000Z","status":"active"},
+  {"id":"h-104","type":"road-damage","title":"Uneven road surface","description":"Potholes reported near the outside edge of the road.","location":"Kulri Bazaar road","lat":30.4561,"lng":78.0720,"severity":"Low","reportedAt":"2026-10-04T06:48:00.000Z","status":"active"}
+]

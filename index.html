@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#123d35" />
+  <title>Pahadi Maps — Safer mountain journeys</title>
+  <link rel="preconnect" href="https://unpkg.com" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Pahadi Maps home"><span class="brand-mark">⌁</span><span>Pahadi<span class="brand-light">Maps</span><small>TRAVEL WITH CARE</small></span></a>
+    <div class="topbar-right"><span class="location-pill"><span class="live-dot"></span> MUSSOORIE REGION</span><button class="avatar" aria-label="Profile">A</button></div>
+  </header>
+  <main class="app-shell">
+    <aside class="sidebar">
+      <div class="welcome"><p class="eyebrow">MOUNTAIN ROAD INTELLIGENCE</p><h1>Take the safer<br/>way up.</h1><p class="muted">Local road updates for a more confident journey.</p></div>
+      <div class="journey-card"><div class="card-top"><span class="eyebrow">YOUR JOURNEY</span><span class="route-tag">● LIVE ROUTE</span></div><div class="route-point"><span class="route-pin start"></span><div><small>FROM</small><strong>Dehradun</strong></div></div><div class="route-line"></div><div class="route-point"><span class="route-pin end"></span><div><small>TO</small><strong>Mussoorie</strong></div></div><div class="route-meta"><span>↗ 34 km</span><span>≈ 1 hr 25 min</span></div><button class="button button-dark full" id="routeBtn">View safer route <span>→</span></button></div>
+      <div class="section-heading"><div><p class="eyebrow">ON YOUR ROUTE</p><h2>Road conditions</h2></div><span class="count-badge" id="hazardCount">0</span></div>
+      <div class="hazard-list" id="hazardList"></div>
+      <button class="report-link" id="openReport"><span class="plus">＋</span> Report a road hazard <span>→</span></button>
+      <div class="sidebar-bottom"><div class="offline-card"><span class="offline-icon">⌁</span><div><strong>Offline ready</strong><p>Recent updates are saved on this device.</p></div><span class="check">✓</span></div></div>
+    </aside>
+    <section class="map-area" aria-label="Interactive road safety map">
+      <div class="map-toolbar"><div class="search-wrap"><span>⌕</span><input id="searchInput" placeholder="Search places or services" aria-label="Search map" /><kbd>⌘ K</kbd></div><div class="map-actions"><button class="icon-button" id="locateBtn" title="Use my location">◎</button><button class="layer-button" id="layersBtn"><span>☷</span> Layers <span class="chevron">⌄</span></button></div></div>
+      <div class="layer-menu hidden" id="layerMenu"><label><input type="checkbox" checked data-layer="hazards"/> Road hazards</label><label><input type="checkbox" checked data-layer="helpers"/> Community helpers</label><label><input type="checkbox" checked data-layer="places"/> Local places</label></div>
+      <div id="map"></div>
+      <div class="map-legend"><span><i class="legend-dot danger"></i>Hazard</span><span><i class="legend-dot helper"></i>Helper</span><span><i class="legend-dot place"></i>Local place</span></div>
+      <div class="map-note"><span class="live-dot"></span> Community updates <strong>·</strong> Updated just now</div>
+      <button class="sos-button" id="sosBtn"><span class="sos-icon">✳</span><span><strong>EMERGENCY SOS</strong><small>Alert nearby helpers</small></span><b>→</b></button>
+      <div class="zoom-note">Map data © OpenStreetMap contributors</div>
+    </section>
+    <aside class="right-rail">
+      <div class="rail-header"><div><p class="eyebrow">COMMUNITY NETWORK</p><h2>Nearby support</h2></div><button class="more-button" aria-label="More options">···</button></div>
+      <div class="safety-status"><span class="status-icon">✳</span><div><strong>You’re not alone out here</strong><p>There are <b id="helperCount">0</b> community helpers nearby.</p></div></div>
+      <div class="rail-section"><div class="section-heading compact"><div><p class="eyebrow">READY TO HELP</p></div><button class="text-button" id="allHelpers">View all</button></div><div id="helperList" class="people-list"></div></div>
+      <div class="rail-divider"></div>
+      <div class="rail-section"><div class="section-heading compact"><div><p class="eyebrow">LOCAL FAVOURITES</p><h2>Good to know</h2></div><button class="text-button" id="allPlaces">View all</button></div><div id="placeList" class="place-list"></div></div>
+      <div class="tip-card"><span class="tip-icon">☼</span><div><strong>A little mountain wisdom</strong><p>Use your horn before every blind bend. The next driver will thank you.</p></div></div>
+    </aside>
+  </main>
+  <nav class="mobile-nav"><button class="active">⌖<small>Explore</small></button><button id="mobileReport">＋<small>Report</small></button><button id="mobileSos">✳<small>SOS</small></button><button id="mobilePlaces">⌂<small>Places</small></button></nav>
+  <dialog id="reportDialog" class="dialog"><form id="reportForm"><button type="button" class="dialog-close" data-close>×</button><p class="eyebrow">HELP THE NEXT TRAVELLER</p><h2>Report a road hazard</h2><p class="muted">Your local update can help someone take a safer route.</p><label>What did you notice?<select name="type" required><option value="blind-curve">Blind curve / low visibility</option><option value="landslide">Landslide or debris</option><option value="road-damage">Road damage</option><option value="poor-lighting">Poor lighting</option><option value="other">Other road hazard</option></select></label><label>Short description<input name="description" maxlength="110" placeholder="e.g. Loose rocks near the turn" required /></label><label>Nearest landmark<input name="location" maxlength="60" placeholder="e.g. Library Chowk" required /></label><div class="dialog-actions"><button type="button" class="button button-light" data-close>Cancel</button><button class="button button-green">Share update <span>→</span></button></div></form></dialog>
+  <dialog id="sosDialog" class="dialog sos-dialog"><form id="sosForm"><button type="button" class="dialog-close" data-close>×</button><span class="big-sos">✳</span><p class="eyebrow">COMMUNITY EMERGENCY RESPONSE</p><h2>Request nearby help?</h2><p class="muted">Your alert will be shared with community helpers within 10 km. This prototype does not contact emergency services.</p><label>What kind of help do you need?<select name="need"><option>Medical assistance</option><option>Vehicle breakdown</option><option>Roadside safety</option><option>Other emergency</option></select></label><div class="dialog-actions"><button type="button" class="button button-light" data-close>Cancel</button><button class="button button-red">Send SOS <span>→</span></button></div></form></dialog>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="/app.js"></script>
+</body>
+</html>

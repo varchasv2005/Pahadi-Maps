@@ -1,0 +1,5 @@
+[
+  {"id":"p-1","name":"Hill View Garage","category":"Roadside mechanic","distance":"2.4 km","icon":"🔧","lat":30.4577,"lng":78.0755,"phone":"+91 135 263 1180"},
+  {"id":"p-2","name":"Old Mussoorie Café","category":"Café · open until 8 pm","distance":"1.1 km","icon":"☕","lat":30.4597,"lng":78.0695,"phone":"+91 135 263 2011"},
+  {"id":"p-3","name":"Pine Rest Homestay","category":"Homestay · 4.7 ★","distance":"3.8 km","icon":"⌂","lat":30.4730,"lng":78.0798,"phone":"+91 98765 43210"}
+]
