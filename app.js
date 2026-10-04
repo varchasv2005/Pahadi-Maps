@@ -33,11 +33,26 @@ function renderLists() {
 function showToast(message) { const el = document.querySelector('#toast'); el.textContent = message; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 3200); }
 async function loadData() {
   try {
-    const response = await fetch('/api/data'); if (!response.ok) throw new Error('API unavailable');
+    const response = await fetch('./api/data'); if (!response.ok) throw new Error('API unavailable');
     Object.assign(store, await response.json()); renderLists();
   } catch {
-    try { Object.assign(store, JSON.parse(localStorage.getItem('pahadi-cache') || '{}')); } catch { /* Show a clean empty state. */ }
-    renderLists(); showToast('Showing saved updates. Reconnect to refresh community reports.');
+    let hasCachedData = false;
+    try {
+      const cached = JSON.parse(localStorage.getItem('pahadi-cache') || 'null');
+      if (cached && Array.isArray(cached.hazards)) { Object.assign(store, cached); hasCachedData = true; }
+    } catch { /* Use the bundled sample data below. */ }
+    if (!hasCachedData) {
+      try {
+        const [hazards, helpers, places] = await Promise.all(['hazards', 'helpers', 'places'].map(async (name) => {
+          const response = await fetch(`./data/${name}.json`);
+          if (!response.ok) throw new Error(`Could not load ${name}`);
+          return response.json();
+        }));
+        Object.assign(store, { hazards, helpers, places });
+      } catch { /* The browser may be offline before a first visit. */ }
+    }
+    renderLists();
+    if (!navigator.onLine) showToast('Showing saved updates. Reconnect to refresh community reports.');
   }
 }
 function openDialog(id) { document.getElementById(id).showModal(); }
@@ -50,18 +65,32 @@ document.querySelectorAll('dialog').forEach((dialog) => dialog.addEventListener(
 document.querySelector('#reportForm').addEventListener('submit', async (event) => {
   event.preventDefault(); const form = new FormData(event.currentTarget);
   try {
-    const response = await fetch('/api/hazards', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: form.get('type'), description: form.get('description'), location: form.get('location'), ...(userLocation ? { lat: userLocation.lat, lng: userLocation.lng } : {}) }) });
-    const result = await response.json(); if (!response.ok) throw new Error(result.error);
-    store.hazards.unshift(result.hazard); renderLists(); event.currentTarget.reset(); document.querySelector('#reportDialog').close(); map.setView([result.hazard.lat, result.hazard.lng], 15); showToast('Thanks — your road update is now on the map.');
-  } catch (error) { showToast(error.message || 'Could not send report. Check your connection.'); }
+    const report = { type: form.get('type'), description: form.get('description'), location: form.get('location'), ...(userLocation ? { lat: userLocation.lat, lng: userLocation.lng } : {}) };
+    let hazard;
+    try {
+      const response = await fetch('./api/hazards', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(report) });
+      const result = await response.json(); if (!response.ok) throw new Error(result.error);
+      hazard = result.hazard;
+    } catch {
+      const titles = { 'blind-curve': 'Blind curve reported', landslide: 'Landslide or debris reported', 'road-damage': 'Road damage reported', 'poor-lighting': 'Poor lighting reported', other: 'Road hazard reported' };
+      hazard = { id: `local-${Date.now()}`, ...report, title: titles[report.type], lat: report.lat || 30.4591, lng: report.lng || 78.0661, severity: 'Medium', reportedAt: new Date().toISOString(), status: 'active' };
+    }
+    store.hazards.unshift(hazard); renderLists(); event.currentTarget.reset(); document.querySelector('#reportDialog').close(); map.setView([hazard.lat, hazard.lng], 15);
+    showToast(navigator.onLine ? 'Thanks — your road update is now on the map.' : 'Saved on this device. It will appear on this device only.');
+  } catch (error) { showToast(error.message || 'Could not save report.'); }
 });
 document.querySelector('#sosForm').addEventListener('submit', async (event) => {
   event.preventDefault(); const need = new FormData(event.currentTarget).get('need');
   try {
-    const response = await fetch('/api/sos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ need, ...(userLocation ? { lat: userLocation.lat, lng: userLocation.lng } : {}) }) });
+    const response = await fetch('./api/sos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ need, ...(userLocation ? { lat: userLocation.lat, lng: userLocation.lng } : {}) }) });
     const result = await response.json(); if (!response.ok) throw new Error(result.error);
     document.querySelector('#sosDialog').close(); showToast(result.message);
-  } catch (error) { showToast(error.message || 'Could not send SOS. Check your connection.'); }
+  } catch {
+    const alerts = JSON.parse(localStorage.getItem('pahadi-alerts') || '[]');
+    alerts.unshift({ id: `local-sos-${Date.now()}`, need, ...(userLocation || { lat: 30.4591, lng: 78.0661 }), createdAt: new Date().toISOString(), status: 'saved-on-device' });
+    localStorage.setItem('pahadi-alerts', JSON.stringify(alerts));
+    document.querySelector('#sosDialog').close(); showToast('Prototype alert saved on this device. It did not notify helpers or emergency services.');
+  }
 });
 document.querySelector('#layersBtn').addEventListener('click', () => document.querySelector('#layerMenu').classList.toggle('hidden'));
 document.querySelectorAll('[data-layer]').forEach((input) => input.addEventListener('change', () => input.checked ? map.addLayer(groups[input.dataset.layer]) : map.removeLayer(groups[input.dataset.layer])));

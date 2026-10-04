@@ -12,6 +12,8 @@ node server.js
 
 Open [http://localhost:3000](http://localhost:3000). The map uses Leaflet and OpenStreetMap tiles, so the interactive map needs an internet connection. The app shell and the most recently loaded lists remain available from the browser's local storage when the API is unreachable.
 
+The frontend can also be served from a static host such as GitHub Pages. In static mode, the bundled JSON files supply the sample map data; new hazard reports and SOS demo alerts are stored only in that browser's local storage. Run the Node server for JSON-backed reports and alerts.
+
 ## Prototype flows
 
 - Use **View safer route** to draw a sample Dehradun–Mussoorie route.
